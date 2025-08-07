@@ -3,6 +3,7 @@
 #include <sstream>
 #include <algorithm>
 #include <stdexcept>
+#include <set> // Added for std::set
 
 std::string Stream::generateId() {
     auto now = std::chrono::system_clock::now();
@@ -69,4 +70,39 @@ std::vector<StreamEntry> Stream::getRange(const std::string& start, const std::s
     }
     
     return result;
+} 
+
+int Stream::deleteEntries(const std::vector<std::string>& ids) {
+    int deleted_count = 0;
+    
+    // Create a set of IDs to delete for efficient lookup
+    std::set<std::string> ids_to_delete(ids.begin(), ids.end());
+    
+    // Remove entries that match the IDs to delete
+    entries.erase(
+        std::remove_if(entries.begin(), entries.end(),
+            [&ids_to_delete, &deleted_count](const StreamEntry& entry) {
+                if (ids_to_delete.find(entry.id) != ids_to_delete.end()) {
+                    deleted_count++;
+                    return true; // Remove this entry
+                }
+                return false; // Keep this entry
+            }),
+        entries.end()
+    );
+    
+    return deleted_count;
+} 
+
+int Stream::trimToLength(size_t max_length) {
+    if (entries.size() <= max_length) {
+        return 0; // No trimming needed
+    }
+    
+    int removed_count = entries.size() - max_length;
+    
+    // Remove the oldest entries (from the beginning)
+    entries.erase(entries.begin(), entries.begin() + removed_count);
+    
+    return removed_count;
 } 

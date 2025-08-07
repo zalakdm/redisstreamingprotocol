@@ -32,6 +32,12 @@ public:
     // Get all entries (for XREAD)
     const std::vector<StreamEntry>& getEntries() const { return entries; }
     
+    // Delete entries by ID
+    int deleteEntries(const std::vector<std::string>& ids);
+    
+    // Trim stream to maximum length
+    int trimToLength(size_t max_length);
+    
     // Generate next ID based on current timestamp
     std::string generateId();
     
